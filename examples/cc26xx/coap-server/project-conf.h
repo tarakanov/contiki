@@ -46,11 +46,18 @@
 #define UIP_CONF_TCP                          0
 #define RPL_CONF_LEAF_ONLY                    1
 
-/*
- * We'll fail without RPL probing, so turn it on explicitly even though it's
- * on by default
- */
-#define RPL_CONF_WITH_PROBING                 1
+#undef REST_MAX_CHUNK_SIZE
+#define REST_MAX_CHUNK_SIZE            48
+#undef COAP_MAX_OPEN_TRANSACTIONS
+#define COAP_MAX_OPEN_TRANSACTIONS     4
+
+
+#undef NETSTACK_CONF_MAC
+#define NETSTACK_CONF_MAC     csma_driver
+#undef NETSTACK_CONF_RDC
+//#define NETSTACK_CONF_RDC     contikimac_driver
+#define NETSTACK_CONF_RDC     nullrdc_driver
+
 /*---------------------------------------------------------------------------*/
 #endif /* PROJECT_CONF_H_ */
 /*---------------------------------------------------------------------------*/

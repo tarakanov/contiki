@@ -11,7 +11,7 @@ PROJECTDIRS += $(REST_RESOURCES_DIR)
 PROJECT_SOURCEFILES += $(REST_RESOURCES_FILES)
 
 PROJECTDIRS += scimage
-PROJECT_SOURCEFILES += scif_framework.c scif_osal_none.c scif.c
+PROJECT_SOURCEFILES += scif_framework.c scif_osal_none.c scif.c led.c
 
 APPS += er-coap
 APPS += rest-engine

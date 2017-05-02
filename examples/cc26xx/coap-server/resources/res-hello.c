@@ -60,7 +60,7 @@ res_get_handler(void *request, void *response, uint8_t *buffer, uint16_t preferr
 {
   const char *len = NULL;
   /* Some data that has the length up to REST_MAX_CHUNK_SIZE. For more, see the chunk resource. */
-  char const *const message = "Hello World! ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxy";
+  char const *const message = "Hello";
   int length = 12; /*           |<-------->| */
 
   /* The query string can be retrieved by rest_get_query() or parsed for its key-value pairs. */

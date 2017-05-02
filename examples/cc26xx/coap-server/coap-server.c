@@ -19,8 +19,12 @@
 #include "rest-engine.h"
 #include "er-coap.h"
 
+//led driver
+#include "led.h"
 
-extern resource_t res_leds, res_toggle, res_hello;
+#include "net/ipv6/sicslowpan.h"
+
+extern resource_t res_leds, res_toggle, res_hello, res_event, res_event_sc, res_radio;
 
 
 
@@ -43,6 +47,7 @@ PROCESS_THREAD(coap_server_process, ev, data)
 
   printf("Coap server test\n");
   etimer_set(&et, LOOP_INTERVAL);
+  led_init();
 
   aux_ctrl_register_consumer(&sc_test_aux);
   scifInit(&scifDriverSetup);
@@ -52,19 +57,23 @@ PROCESS_THREAD(coap_server_process, ev, data)
   rest_init_engine();
   rest_activate_resource(&res_toggle, "actuators/toggle");
   rest_activate_resource(&res_leds, "actuators/leds");
-  //rest_activate_resource(&res_parent_rssi, "rssi");
-  rest_activate_resource(&res_hello, "hello");
-
+  rest_activate_resource(&res_event, "test/event");
+  rest_activate_resource(&res_radio, "test/rssi");
+  rest_activate_resource(&res_hello, "test/hello");
+  rest_activate_resource(&res_event_sc, "test/sc");
+  led_set();
   while(1) {
 
     PROCESS_YIELD();
-
+    led_toggle();
     if (ev == PROCESS_EVENT_TIMER && (data == &et || data == &st_duration)) {
 
           printf("************\n");
           printf("Info from SC:\n");
           printf("Levels: nh - %d, nl - %d, nt - %d, rt - %d)\n", scifTaskData.newTask.cfg.namurHigh,
                  scifTaskData.newTask.cfg.namurLow, scifTaskData.newTask.cfg.namurLevel, scifTaskData.newTask.cfg.reedLevel);
+          printf("Poll Time: %d\n", scifTaskData.newTask.cfg.pollTime);
+          printf("RSSI: %d\n", sicslowpan_get_last_rssi());
           printf("Counters Ch1: nc - %d, nr - %d\n", scifTaskData.newTask.output.counterNamurCh1, scifTaskData.newTask.output.counterReedCh1);
           printf("Counters Ch2: nc - %d, nr - %d\n", scifTaskData.newTask.output.counterNamurCh2, scifTaskData.newTask.output.counterReedCh2);
           printf("State Ch1: error - %d, type - %d\n", scifTaskData.newTask.output.channelErrorCh1, scifTaskData.newTask.output.typeCh1);
@@ -73,13 +82,14 @@ PROCESS_THREAD(coap_server_process, ev, data)
           printf("Clear flags Ch2: ce - %d, cc - %d\n", scifTaskData.newTask.state.clearErrorCh2, scifTaskData.newTask.state.clearCounterCh2);
           if(stimer_expired(&st_duration)) {
               printf("Clearing error and counter\n");
-              stimer_set(&st_duration,  18);
+              stimer_set(&st_duration,  3600);
               scifTaskData.newTask.state.clearErrorCh1 = 1;
               scifTaskData.newTask.state.clearCounterCh1 = 1;
               scifTaskData.newTask.state.clearErrorCh2 = 1;
               scifTaskData.newTask.state.clearCounterCh2 = 1;
           }
-
+        res_event.trigger();
+        res_event_sc.trigger();
         etimer_set(&et, LOOP_INTERVAL);
     }
 

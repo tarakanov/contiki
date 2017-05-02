@@ -40,6 +40,8 @@
 #include "rest-engine.h"
 #include "er-coap.h"
 
+#include "scif.h"
+
 #define DEBUG 1
 #if DEBUG
 #include <stdio.h>
@@ -60,8 +62,8 @@ static void res_event_handler(void);
  * Additionally takes a period parameter that defines the interval to call [name]_periodic_handler().
  * A default post_handler takes care of subscriptions and manages a list of subscribers to notify.
  */
-EVENT_RESOURCE(res_event,
-               "title=\"Event demo\";obs",
+EVENT_RESOURCE(res_event_sc,
+               "title=\"Sensor Controller sc\";obs",
                res_get_handler,
                NULL,
                NULL,
@@ -77,7 +79,9 @@ static void
 res_get_handler(void *request, void *response, uint8_t *buffer, uint16_t preferred_size, int32_t *offset)
 {
   REST.set_header_content_type(response, REST.type.TEXT_PLAIN);
-  REST.set_response_payload(response, buffer, snprintf((char *)buffer, preferred_size, "EVENT %lu", event_counter));
+  REST.set_response_payload(response, buffer, snprintf((char *)buffer, preferred_size, "Ch1, Ch2 -  %lu, %lu, %lu, %lu",
+                                                       scifTaskData.newTask.output.counterNamurCh1, scifTaskData.newTask.output.counterReedCh1,
+                                                       scifTaskData.newTask.output.counterNamurCh2, scifTaskData.newTask.output.counterReedCh2));
 
   /* A post_handler that handles subscriptions/observing will be called for periodic resources by the framework. */
 }
@@ -93,9 +97,9 @@ res_event_handler(void)
 
   /* Usually a condition is defined under with subscribers are notified, e.g., event was above a threshold. */
   if(1) {
-    PRINTF("TICK %u for /%s\n", event_counter, res_event.url);
+    PRINTF("TICK %u for /%s\n", event_counter, res_event_sc.url);
 
     /* Notify the registered observers which will trigger the res_get_handler to create the response. */
-    REST.notify_subscribers(&res_event);
+    REST.notify_subscribers(&res_event_sc);
   }
 }
