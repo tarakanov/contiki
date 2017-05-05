@@ -32,7 +32,7 @@ static struct stimer st_duration;
 
 /*****************************************************************************/
 
-#define LOOP_INTERVAL       (CLOCK_SECOND * 6)
+#define LOOP_INTERVAL       (CLOCK_SECOND * 3)
 static struct etimer et;
 
 /*---------------------------------------------------------------------------*/
@@ -43,7 +43,7 @@ PROCESS_THREAD(sc_test_process, ev, data)
 
   printf("SC test\n");
   etimer_set(&et, LOOP_INTERVAL);
-  stimer_set(&st_duration,  LOOP_INTERVAL * 10);
+  stimer_set(&st_duration,  18);
 
   aux_ctrl_register_consumer(&sc_test_aux);
   scifInit(&scifDriverSetup);
@@ -74,7 +74,7 @@ PROCESS_THREAD(sc_test_process, ev, data)
           printf("Clear flags Ch2: ce - %d, cc - %d\n", scifTaskData.newTask.state.clearErrorCh2, scifTaskData.newTask.state.clearCounterCh2);
           if(stimer_expired(&st_duration)) {
               printf("Clearing error and counter\n");
-              stimer_set(&st_duration,  LOOP_INTERVAL * 10);
+              stimer_set(&st_duration, 18);
               scifTaskData.newTask.state.clearErrorCh1 = 1;
               scifTaskData.newTask.state.clearCounterCh1 = 1;
               scifTaskData.newTask.state.clearErrorCh2 = 1;
