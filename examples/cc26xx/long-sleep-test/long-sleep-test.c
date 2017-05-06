@@ -38,13 +38,77 @@ static struct etimer et;
 static uint8_t state;
 
 #define PERIODIC_INTERVAL         CLOCK_SECOND
-#define INTERVAL    90 * 60 // Sleep time sec
+#define INTERVAL    12 * 60 // Sleep time sec
 #define DURATION    10 // Normal time sec
 #define KEEP_MAC_ON_MIN_PERIOD 5 /* secs */
 
 #define STATE_NORMAL           0
 #define STATE_NOTIFY_OBSERVERS 1
 #define STATE_VERY_SLEEPY      2
+
+
+
+void
+print_network_status(void)
+{
+  int i;
+  uint8_t state;
+  uip_ds6_defrt_t *default_route;
+  uip_ds6_route_t *route;
+  printf("--- Network status ---\n");
+  /* Our IPv6 addresses */
+  printf("- Server IPv6 addresses:\n");
+  for(i = 0; i < UIP_DS6_ADDR_NB; i++) {
+    state = uip_ds6_if.addr_list[i].state;
+    if(uip_ds6_if.addr_list[i].isused &&
+       (state == ADDR_TENTATIVE || state == ADDR_PREFERRED)) {
+        printf("-- ");
+      uip_debug_ipaddr_print(&uip_ds6_if.addr_list[i].ipaddr);
+      printf("\n");
+    }
+  }
+  /* Our default route */
+  printf("- Default route:\n");
+  default_route = uip_ds6_defrt_lookup(uip_ds6_defrt_choose());
+  if(default_route != NULL) {
+      printf("-- ");
+    uip_debug_ipaddr_print(&default_route->ipaddr);;
+    printf(" (lifetime: %lu seconds)\n", (unsigned long)default_route->lifetime.interval);
+  } else {
+      printf("-- None\n");
+  }
+  /* Our routing entries */
+  printf("- Routing entries (%u in total):\n", uip_ds6_route_num_routes());
+  route = uip_ds6_route_head();
+  while(route != NULL) {
+      printf("-- ");
+    uip_debug_ipaddr_print(&route->ipaddr);
+    printf(" via ");
+    uip_debug_ipaddr_print(uip_ds6_route_nexthop(route));
+    printf(" (lifetime: %lu seconds)\n", (unsigned long)route->state.lifetime);
+    route = uip_ds6_route_next(route);
+  }
+  printf("----------------------\n");
+}
+/*---------------------------------------------------------------------------*/
+static void
+print_local_addresses(void)
+{
+  int i;
+  uint8_t state;
+
+  printf("Server IPv6 addresses:\n");
+  for(i = 0; i < UIP_DS6_ADDR_NB; i++) {
+    state = uip_ds6_if.addr_list[i].state;
+    if(uip_ds6_if.addr_list[i].isused &&
+       (state == ADDR_TENTATIVE || state == ADDR_PREFERRED)) {
+        printf(" ");
+      uip_debug_ipaddr_print(&uip_ds6_if.addr_list[i].ipaddr);
+      printf("\n");
+    }
+  }
+}
+/*---------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------*/
 /*
@@ -63,8 +127,8 @@ keep_mac_on(void)
   uint8_t rv = MAC_CAN_BE_TURNED_OFF;
 
   if(!stimer_expired(&st_min_mac_on_duration)) {
+    printf("MAC_MUST_STAY_ON first\n");
     return MAC_MUST_STAY_ON;
-    printf("MAC_MUST_STAY_ON\n");
   }
 
 #if RPL_WITH_PROBING
@@ -73,6 +137,7 @@ keep_mac_on(void)
                 &rpl_get_default_instance()->probing_timer.etimer),
               (clock_time() + PERIODIC_INTERVAL))) {
     rv = MAC_MUST_STAY_ON;
+    printf("MAC_MUST_STAY_ON PROBING\n");
   }
 #endif
 
@@ -82,11 +147,11 @@ keep_mac_on(void)
   if(nbr == NULL) {
     /* We don't have a default route, or it's not reachable (NUD likely). */
     rv = MAC_MUST_STAY_ON;
-    printf("MAC_MUST_STAY_ON\n");
+    printf("MAC_MUST_STAY_ON no default route\n");
   } else {
     if(nbr->state != NBR_REACHABLE) {
       rv = MAC_MUST_STAY_ON;
-      printf("MAC_MUST_STAY_ON\n");
+      printf("MAC_MUST_STAY_ON not NBR REACHABLE\n");
     }
   }
 
@@ -158,7 +223,8 @@ PROCESS_THREAD(coap_server_process, ev, data)
 
     PROCESS_YIELD();
     printf("[%lu] periodic wakeup\n", clock_seconds());
-
+    print_network_status();
+    print_local_addresses();
     if (ev == PROCESS_EVENT_TIMER && (data == &et || data == &st_duration || data == &st_interval)) {
         printf("ET periodic\n");
 

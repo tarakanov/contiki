@@ -18,8 +18,8 @@
 #define UIP_CONF_TCP                          0
 #define RPL_CONF_LEAF_ONLY                    1
 
-#define RPL_CONF_WITH_PROBING                 0
-
+#define RPL_CONF_WITH_PROBING                 1
+#define CC26XX_UART_CONF_BAUD_RATE    460800
 
 #undef NETSTACK_CONF_MAC
 #define NETSTACK_CONF_MAC     csma_driver

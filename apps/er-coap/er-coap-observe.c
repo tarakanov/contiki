@@ -40,7 +40,7 @@
 #include <string.h>
 #include "er-coap-observe.h"
 
-#define DEBUG 0
+#define DEBUG 1
 #if DEBUG
 #include <stdio.h>
 #define PRINTF(...) printf(__VA_ARGS__)
@@ -281,7 +281,7 @@ coap_observe_handler(resource_t *resource, void *request, void *response)
            * A subscription should return the same representation as a normal GET.
            * Uncomment if you want an information about the avaiable observers.
            */
-#if 0
+#if 1
           static char content[16];
           coap_set_payload(coap_res,
                            content,
