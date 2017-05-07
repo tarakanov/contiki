@@ -37,8 +37,9 @@ static struct stimer st_interval;
 static struct etimer et;
 static uint8_t state;
 
+#define LOOP_INTERVAL       (CLOCK_SECOND * 1 * 1) // cycle main loop
 #define PERIODIC_INTERVAL         CLOCK_SECOND
-#define INTERVAL    12 * 60 // Sleep time sec
+#define INTERVAL    5 * 60 // Sleep time sec
 #define DURATION    10 // Normal time sec
 #define KEEP_MAC_ON_MIN_PERIOD 5 /* secs */
 
@@ -187,7 +188,6 @@ AUTOSTART_PROCESSES(&coap_server_process);
 
 /*****************************************************************************/
 
-#define LOOP_INTERVAL       (CLOCK_SECOND * 1)
 
 /*---------------------------------------------------------------------------*/
 PROCESS_THREAD(coap_server_process, ev, data)
