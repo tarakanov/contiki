@@ -36,7 +36,7 @@ static struct stimer st_duration;
 
 /*****************************************************************************/
 
-#define LOOP_INTERVAL       (CLOCK_SECOND * 6)
+#define LOOP_INTERVAL       (CLOCK_SECOND * 1)
 static struct etimer et;
 
 /*---------------------------------------------------------------------------*/
@@ -81,15 +81,15 @@ PROCESS_THREAD(coap_server_process, ev, data)
           printf("Clear flags Ch1: ce - %d, cc - %d\n", scifTaskData.newTask.state.clearErrorCh1, scifTaskData.newTask.state.clearCounterCh1);
           printf("Clear flags Ch2: ce - %d, cc - %d\n", scifTaskData.newTask.state.clearErrorCh2, scifTaskData.newTask.state.clearCounterCh2);
           if(stimer_expired(&st_duration)) {
+              res_event.trigger();
+              res_event_sc.trigger();
               printf("Clearing error and counter\n");
-              stimer_set(&st_duration,  3600);
               scifTaskData.newTask.state.clearErrorCh1 = 1;
               scifTaskData.newTask.state.clearCounterCh1 = 1;
               scifTaskData.newTask.state.clearErrorCh2 = 1;
               scifTaskData.newTask.state.clearCounterCh2 = 1;
+              stimer_set(&st_duration,  3600);
           }
-        res_event.trigger();
-        res_event_sc.trigger();
         etimer_set(&et, LOOP_INTERVAL);
     }
 

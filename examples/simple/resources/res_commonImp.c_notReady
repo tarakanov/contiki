@@ -1,0 +1,25 @@
+#include "contiki.h"
+#include "rest-engine.h"
+#include "../userFile.c"
+
+static void
+res_get_commonImp(void *request, void *response, uint8_t *buffer, uint16_t preferred_size, int32_t *offset)
+{
+  //start_indicate(transfer, ignore_settings);
+  REST.set_header_content_type(response, REST.type.TEXT_PLAIN); /* text/plain is the default, hence this option could be omitted. */
+  REST.set_response_payload(response, buffer, snprintf((char *)buffer, preferred_size, "%s", getMessageString(cntImpCommon.cntImp[1], 1)));
+}
+
+static void 
+commonImp_event_handler(void)
+{
+  REST.notify_subscribers(&res_commonImp);
+}
+
+EVENT_RESOURCE(res_commonImp,
+         "title=\"Common impulse red count\";obs",
+         res_get_commonImp,
+         NULL,
+         NULL,
+	 NULL,
+	 commonImp_event_handler);

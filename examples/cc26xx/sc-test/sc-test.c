@@ -32,7 +32,7 @@ static struct stimer st_duration;
 
 /*****************************************************************************/
 
-#define LOOP_INTERVAL       (CLOCK_SECOND * 3)
+#define LOOP_INTERVAL       (CLOCK_SECOND * 1)
 static struct etimer et;
 
 /*---------------------------------------------------------------------------*/
@@ -43,10 +43,12 @@ PROCESS_THREAD(sc_test_process, ev, data)
 
   printf("SC test\n");
   etimer_set(&et, LOOP_INTERVAL);
-  stimer_set(&st_duration,  18);
+  stimer_set(&st_duration,  3600);
 
   aux_ctrl_register_consumer(&sc_test_aux);
+
   scifInit(&scifDriverSetup);
+  scifTaskData.newTask.cfg.pollTime = 300;
   scifExecuteTasksOnceNbl(BV(SCIF_NEW_TASK_TASK_ID));
   leds_off(LEDS_GREEN);
   //NETSTACK_MAC.off(0);
@@ -55,7 +57,6 @@ PROCESS_THREAD(sc_test_process, ev, data)
   rest_activate_resource(&res_leds, "actuators/leds");
   //rest_activate_resource(&res_parent_rssi, "rssi");
   rest_activate_resource(&res_hello, "hello");
-
   while(1) {
 
     PROCESS_YIELD();
@@ -72,9 +73,10 @@ PROCESS_THREAD(sc_test_process, ev, data)
           printf("State Ch2: error - %d, type - %d\n", scifTaskData.newTask.output.channelErrorCh2, scifTaskData.newTask.output.typeCh2);
           printf("Clear flags Ch1: ce - %d, cc - %d\n", scifTaskData.newTask.state.clearErrorCh1, scifTaskData.newTask.state.clearCounterCh1);
           printf("Clear flags Ch2: ce - %d, cc - %d\n", scifTaskData.newTask.state.clearErrorCh2, scifTaskData.newTask.state.clearCounterCh2);
+          printf("Loop counter - %lu, pooltime  - %d\n", scifTaskData.newTask.state.loopcounter, scifTaskData.newTask.cfg.pollTime);
           if(stimer_expired(&st_duration)) {
               printf("Clearing error and counter\n");
-              stimer_set(&st_duration, 18);
+              stimer_set(&st_duration, 3600);
               scifTaskData.newTask.state.clearErrorCh1 = 1;
               scifTaskData.newTask.state.clearCounterCh1 = 1;
               scifTaskData.newTask.state.clearErrorCh2 = 1;
