@@ -7,6 +7,7 @@
 [submodule "cpu/cc26xx-cc13xx/lib/cc26xxware"]
 	path = cpu/cc26xx-cc13xx/lib/cc26xxware
 	url = https://github.com/contiki-os/cc26xxware.git
+        branch = master
 [submodule "cpu/cc26xx-cc13xx/lib/cc13xxware"]
 	path = cpu/cc26xx-cc13xx/lib/cc13xxware
 	url = https://github.com/contiki-os/cc13xxware.git
