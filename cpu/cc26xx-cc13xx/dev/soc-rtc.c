@@ -87,8 +87,8 @@ soc_rtc_init(void)
   ti_lib_aon_event_mcu_wake_up_set(AON_EVENT_MCU_WU0, AON_EVENT_RTC_CH0);
   ti_lib_aon_event_mcu_wake_up_set(AON_EVENT_MCU_WU1, AON_EVENT_RTC_CH1);
   ti_lib_aon_event_mcu_wake_up_set(AON_EVENT_MCU_WU2, AON_EVENT_RTC_CH2);
-  ti_lib_aon_rtc_combined_event_config(AON_RTC_CH0 | AON_RTC_CH1 | AON_RTC_CH2);
-
+//  ti_lib_aon_rtc_combined_event_config(AON_RTC_CH0 | AON_RTC_CH1 | AON_RTC_CH2);
+  ti_lib_aon_rtc_combined_event_config(AON_RTC_CH0 | AON_RTC_CH1);
   HWREG(AON_RTC_BASE + AON_RTC_O_SEC) = SOC_RTC_START_TICK_COUNT;
 
   next = ti_lib_aon_rtc_current_compare_value_get() + COMPARE_INCREMENT;
@@ -172,11 +172,13 @@ soc_rtc_isr(void)
     rtimer_run_next();
   }
 
-  if(ti_lib_aon_rtc_event_get(AON_RTC_CH2)) {
+
+  //ch2 is only for sensor controller
+ // if(ti_lib_aon_rtc_event_get(AON_RTC_CH2)) {
     /* after sleep; since a rtimer is already scheduled, do nothing */
-    ti_lib_aon_rtc_channel_disable(AON_RTC_CH2);
-    HWREG(AON_RTC_BASE + AON_RTC_O_EVFLAGS) = AON_RTC_EVFLAGS_CH2;
-  }
+ //   ti_lib_aon_rtc_channel_disable(AON_RTC_CH2);
+ //   HWREG(AON_RTC_BASE + AON_RTC_O_EVFLAGS) = AON_RTC_EVFLAGS_CH2;
+ // }
 
   ENERGEST_OFF(ENERGEST_TYPE_IRQ);
 }

@@ -41,6 +41,12 @@
 #include "er-coap-transactions.h"
 #include "er-coap-observe.h"
 
+//if we want to signal the process when transaction list is empty
+//#include "counter.c"
+//process_event_t transaction_event;
+//PROCESS(coap_server_process, "coap server process");
+//AUTOSTART_PROCESSES(&coap_server_process);
+
 #define DEBUG 0
 #if DEBUG
 #include <stdio.h>
@@ -143,6 +149,8 @@ coap_clear_transaction(coap_transaction_t *t)
 {
   if(t) {
     PRINTF("Freeing transaction %u: %p\n", t->mid, t);
+    //if we want to signal the process when transaction list is empty
+    //process_post(&coap_server_process, transaction_event, NULL);
 
     etimer_stop(&t->retrans_timer);
     list_remove(transactions_list, t);
